@@ -1,28 +1,113 @@
 import logo from './logo.svg';
 import './App.css';
+import { useConnect } from 'wagmi'
+import { useState, useEffect } from 'react'
+import { ethers } from "ethers";
 
-function App () {
-
+function App() {
+  const [{ data, error }, connect] = useConnect();
+  const [currentAccount, setCurrentAccount] = useState("");
   const shortenAddress = (str) => {
     return str.substring(0, 6) + "..." + str.substring(str.length - 4);
   };
+  const CONTRACT_ADDRESS = "0xbd2428177aD6f662Cf8F695d0D7e27F8Df6a4FF6";
+
+  const checkIfWalletIsConnected = async () => {
+    const { ethereum } = window;
+
+    if (!ethereum) {
+      alert("Get MetaMask!");
+      return;
+    } else {
+      console.log("We have the ethereum object", ethereum);
+    }
+    const accounts = await ethereum.request({ method: 'eth_accounts' });
+    if (accounts.length !== 0) {
+      const account = accounts[0];
+      console.log("Found an authorized account:", account);
+      setCurrentAccount(account)
+    } else {
+      console.log("No authorized account found")
+    }
+  }
+
+  const connectWallet = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (!ethereum) {
+        alert("Get MetaMask!");
+        return;
+      }
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+      console.log("Connected", accounts[0]);
+      setCurrentAccount(accounts[0]);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const mintNFT = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        //  const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
+
+
+        console.log("Going to pop wallet now to pay gas...")
+        // let nftTxn = await connectedContract.createToken();
+
+        console.log("Mining...please wait.")
+        // await nftTxn.wait();
+
+        // alert(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
+
+        // await getNFTs()
+
+      } else {
+        console.log("Ethereum object doesn't exist!");
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    checkIfWalletIsConnected();
+    // settotalNFTsLeft(nfts);
+  }, [])
 
   return (
-    <div className="App">
-      <header className="App-header">
+    <div className="min-h-screen bg-lime-400 App">
+      <div className='flex justify-between px-4 py-6'>
+        <h1 className="text-3xl font-extrabold tracking-tight text-white ">
+          <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-fuchsia-800">Dynamics ai </span>
+        </h1>
+        {!currentAccount ?
+          <button className='px-4 py-2 text-purple-100 bg-purple-600 rounded-xl' onClick={connectWallet}>
+            Connect to wallet
+          </button>
+          :
+          <div className='px-4 py-2 text-purple-500 border border-purple-500 rounded-xl'> {shortenAddress(currentAccount)}</div>
+        }
+      </div>
 
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+
+      <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-white sm:mt-5 sm:text-4xl lg:mt-6 xl:text-6xl">
+        <span className="block">A better way to mint  </span>
+        <span className="block pb-3 text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-200 to-fuchsia-800 sm:pb-5">
+          NFTs using AI
+        </span>
+
+      </h1>
+      <div className='mt-5'>
+        <button
+          onClick={mintNFT}
+          className='text-white  bg-gradient-to-r from-purple-500 to-fuchsia-800 rounded-xl px-4 py-2.5 hover:bg-fuchsia-800'>Mint your ai nft</button>
+      </div>
     </div>
   );
 }
