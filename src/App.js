@@ -3,14 +3,15 @@ import './App.css';
 import { useConnect } from 'wagmi'
 import { useState, useEffect } from 'react'
 import { ethers } from "ethers";
+import DynamicNFT from "./util/DynamicNFT.json";
 
-function App() {
+function App () {
   const [{ data, error }, connect] = useConnect();
   const [currentAccount, setCurrentAccount] = useState("");
   const shortenAddress = (str) => {
     return str.substring(0, 6) + "..." + str.substring(str.length - 4);
   };
-  const CONTRACT_ADDRESS = "0xbd2428177aD6f662Cf8F695d0D7e27F8Df6a4FF6";
+  const CONTRACT_ADDRESS = "0xF9C90fAdEBe19117a000588E3ff5D6A8AAF00f57";
 
   const checkIfWalletIsConnected = async () => {
     const { ethereum } = window;
@@ -54,18 +55,25 @@ function App() {
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
-        //  const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
+        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, DynamicNFT.abi, signer);
 
 
         console.log("Going to pop wallet now to pay gas...")
-        // let nftTxn = await connectedContract.createToken();
+        let nftTxn = await connectedContract.createToken(
+          {
+            "description": "Friendly OpenSea Creature that enjoys long swims in the ocean.",
+            "external_url": "https://openseacreatures.io/3",
+            "image": "ipfs://QmVQhpUHLAs8hT3GsG7og8ydzoBGgtfZJ1KZUm4X6ocYee",
+            "name": "Dave Starbelly"
+          }
+        );
 
         console.log("Mining...please wait.")
-        // await nftTxn.wait();
+        await nftTxn.wait();
 
-        // alert(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
+        alert(`Mined, see transaction: https://mumbai.polygonscan.com/tx/${nftTxn.hash}`);
 
-        // await getNFTs()
+        //await getNFTs()
 
       } else {
         console.log("Ethereum object doesn't exist!");
@@ -103,11 +111,13 @@ function App() {
         </span>
 
       </h1>
-      <div className='mt-5'>
-        <button
-          onClick={mintNFT}
-          className='text-white  bg-gradient-to-r from-purple-500 to-fuchsia-800 rounded-xl px-4 py-2.5 hover:bg-fuchsia-800'>Mint your ai nft</button>
-      </div>
+      {currentAccount ?
+        <div className='mt-5'>
+          <button
+            onClick={mintNFT}
+            className='text-white  bg-gradient-to-r from-purple-500 to-fuchsia-800 rounded-xl px-4 py-2.5 hover:bg-fuchsia-800'>Mint your ai nft</button>
+        </div> : ''
+      }
     </div>
   );
 }
