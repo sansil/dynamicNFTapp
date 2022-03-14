@@ -83,8 +83,19 @@ function App () {
     }
   }
 
+
+  const checkNetwork = async () => {
+    try {
+      if (window.ethereum.networkVersion !== '80001') {
+        alert("Please connect to Mumbai network!")
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   useEffect(() => {
     checkIfWalletIsConnected();
+    checkNetwork();
     // settotalNFTsLeft(nfts);
   }, [])
 
